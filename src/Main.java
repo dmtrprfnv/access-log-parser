@@ -1,5 +1,10 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) throws GetFileStatisticsExeption{
@@ -22,6 +27,8 @@ public class Main {
 
                 try {
                     int totalRows = 0, longestLineLength = 0, shortestLineLength = Integer.MAX_VALUE;
+                    int googleBotCount = 0, yandexBotCount = 0;
+
                     FileReader fileReader = new FileReader(path);
                     BufferedReader reader =
                             new BufferedReader(fileReader);
@@ -36,11 +43,27 @@ public class Main {
                             shortestLineLength = length;
                         }
                         totalRows++;
+
+                        LogParser l = new LogParser(line);
+
+
+                        Pattern pattern = Pattern.compile("\\(compatible;.*?\\)");
+                        Matcher matcher = pattern.matcher(l.userAgent);
+
+                        if (matcher.find()) {
+                            String[] parts = matcher.group(0).split(";");
+
+                            if (parts.length >= 2) {
+                                String fragment = parts[1].trim().split("/")[0];
+
+                                if (fragment.equals("YandexBot")) yandexBotCount++;
+                                if (fragment.equals("Googlebot")) googleBotCount++;
+                            }
+                        }
                     }
-                    System.out.println("FILE-STATISTICS---------------------------------");
-                    System.out.println("longestLineLength = " + longestLineLength + ", " +
-                                    "\nshortestLineLength = " + shortestLineLength + ", " +
-                                    "\ntotalRows = " + totalRows);
+                    System.out.println("totalRows = " + totalRows);
+                    System.out.println("Request rate with YandexBot: " + yandexBotCount + "/" + totalRows + "\n"
+                            + "Request rate with GoogleBot: " + googleBotCount + "/" + totalRows);
 
                 } catch (GetFileStatisticsExeption e) {
                     e.printStackTrace();
