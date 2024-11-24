@@ -79,6 +79,10 @@ public class Main {
                     Map<String, Double> browserShares = statistics.getBrowserShares();
                     System.out.println("Shares of browsers: " + browserShares);
 
+                    System.out.printf("Average number of visits per hour: %.3f\n", statistics.averageVisitsPerHour());
+                    System.out.printf("Average number of error requests per hour: %.3f\n", statistics.averageErrorRequestsPerHour());
+                    System.out.printf("Average number of visits per user: %.3f\n", statistics.averageVisitsPerUser());
+
                 } catch (GetFileStatisticsExeption e) {
                     e.printStackTrace();
                 } catch (FileNotFoundException e) {

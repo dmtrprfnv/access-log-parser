@@ -7,19 +7,25 @@ import java.util.Locale;
 import java.util.Map;
 
 public class Statistics {
-    double totalTraffic;
-    LocalDateTime minTime, maxTime;
-    HashSet<String> urlSuccessSet, urlNotFoundSet;
-    HashMap<String, Integer> osStatistics, browserStatistics;
+    private double totalTraffic;
+    private LocalDateTime minTime, maxTime;
+    private HashSet<String> urlSuccessSet, urlNotFoundSet, uniqueUsers;
+    private HashMap<String, Integer> osStatistics, browserStatistics;
+    private int totalVisits, totalErrorRequests;
+
 
     public Statistics() {
-        totalTraffic = 0;
-        minTime = LocalDateTime.parse("26/Sep/2100:10:18:06 +0300", DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH));
-        maxTime = LocalDateTime.parse("26/Sep/1980:10:18:06 +0300", DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH));
-        urlSuccessSet = new HashSet<>();
-        urlNotFoundSet = new HashSet<>();
-        osStatistics = new HashMap<>();
-        browserStatistics = new HashMap<>();
+        this.totalTraffic = 0;
+        this.minTime = LocalDateTime.parse("26/Sep/2100:10:18:06 +0300", DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH));
+        this.maxTime = LocalDateTime.parse("26/Sep/1980:10:18:06 +0300", DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH));
+        this.urlSuccessSet = new HashSet<>();
+        this.urlNotFoundSet = new HashSet<>();
+        this.osStatistics = new HashMap<>();
+        this.browserStatistics = new HashMap<>();
+        this.totalVisits = 0;
+        this.totalErrorRequests = 0;
+        this.uniqueUsers = new HashSet<>();
+
     }
 
     void addEntry (LogEntry entry) {
@@ -48,6 +54,29 @@ public class Statistics {
         } else {
             browserStatistics.put(entry.userAgent.browser, 1);
         }
+
+        if (!entry.userAgent.isBot()) {
+            totalVisits++;
+            uniqueUsers.add(entry.ipAddr);
+        }
+
+        if (entry.responseCode >= 400) {
+            totalErrorRequests++;
+        }
+    }
+
+    public double averageVisitsPerHour() {
+        Duration duration = Duration.between(minTime, maxTime);
+        return duration.toHours() == 0 ? 0 : (double) totalVisits / duration.toHours();
+    }
+
+    public double averageErrorRequestsPerHour() {
+        Duration duration = Duration.between(minTime, maxTime);
+        return duration.toHours() == 0 ? 0 : (double) totalErrorRequests / duration.toHours();
+    }
+
+    public double averageVisitsPerUser () {
+        return uniqueUsers.isEmpty() ? 0 : (double) totalVisits / uniqueUsers.size();
     }
 
     public HashSet<String> getUrlSuccessSet() {

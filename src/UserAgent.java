@@ -45,6 +45,10 @@ public class UserAgent {
         this.userAgent = agent;
     }
 
+    public boolean isBot() {
+        return userAgent.toLowerCase().contains("bot");
+    }
+
     public String getOperationSystem() {
         return operationSystem;
     }
