@@ -1,18 +1,17 @@
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Statistics {
     private double totalTraffic;
-    private LocalDateTime minTime, maxTime;
-    private HashSet<String> urlSuccessSet, urlNotFoundSet, uniqueUsers;
-    private HashMap<String, Integer> osStatistics, browserStatistics;
     private int totalVisits, totalErrorRequests;
-
+    private LocalDateTime minTime, maxTime;
+    private HashSet<String> urlSuccessSet, urlNotFoundSet, uniqueUsers, uniqueDomains;
+    private HashMap<String, Integer> osStatistics, browserStatistics, userVisits;
+    private HashMap<Integer, Integer> visitsPerSecond;
 
     public Statistics() {
         this.totalTraffic = 0;
@@ -25,7 +24,9 @@ public class Statistics {
         this.totalVisits = 0;
         this.totalErrorRequests = 0;
         this.uniqueUsers = new HashSet<>();
-
+        this.visitsPerSecond = new HashMap<>();
+        this.uniqueDomains = new HashSet<>();
+        this.userVisits = new HashMap<>();
     }
 
     void addEntry (LogEntry entry) {
@@ -58,11 +59,52 @@ public class Statistics {
         if (!entry.userAgent.isBot()) {
             totalVisits++;
             uniqueUsers.add(entry.ipAddr);
+
+            int seconds = entry.date.getSecond();
+            if (visitsPerSecond.containsKey(seconds)) {
+                visitsPerSecond.put(seconds, visitsPerSecond.get(seconds) + 1);
+            } else {
+                visitsPerSecond.put(seconds, 1);
+            }
+
+            if (userVisits.containsKey(entry.ipAddr)) {
+                userVisits.put(entry.ipAddr, userVisits.get(entry.ipAddr) + 1);
+            } else {
+                userVisits.put(entry.ipAddr, 1);
+            }
+        }
+
+        if (entry.referer != null && !entry.referer.isEmpty()) {
+            String referrerDomain = extractDomain(entry.referer);
+            uniqueDomains.add(referrerDomain);
         }
 
         if (entry.responseCode >= 400) {
             totalErrorRequests++;
         }
+
+    }
+
+    private String extractDomain(String url) {
+        String regex = "^(?:https?:\\/\\/)?([^\\/]+)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(url);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return "";
+    }
+
+    public Set<String> getUniqueDomains() {
+        return uniqueDomains;
+    }
+
+    public int getPeakTraffic() {
+        return visitsPerSecond.values().stream().mapToInt(Integer::intValue).max().orElse(0);
+    }
+
+    public int getPeakVisits() {
+        return userVisits.values().stream().mapToInt(Integer::intValue).max().orElse(0);
     }
 
     public double averageVisitsPerHour() {
@@ -77,6 +119,10 @@ public class Statistics {
 
     public double averageVisitsPerUser () {
         return uniqueUsers.isEmpty() ? 0 : (double) totalVisits / uniqueUsers.size();
+    }
+
+    public HashMap<Integer, Integer> getVisitsPerSecond() {
+        return visitsPerSecond;
     }
 
     public HashSet<String> getUrlSuccessSet() {

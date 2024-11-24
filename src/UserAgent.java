@@ -3,6 +3,7 @@ import java.util.regex.Pattern;
 
 public class UserAgent {
     final String userAgent, operationSystem, browser;
+    final boolean isBot;
 
     public UserAgent(String agent) {
 
@@ -43,6 +44,10 @@ public class UserAgent {
         }
         else {this.browser = "Unknown";}
         this.userAgent = agent;
+
+        if (userAgent.toLowerCase().contains("bot")) {
+            this.isBot = true;
+        } else this.isBot = false;
     }
 
     public boolean isBot() {

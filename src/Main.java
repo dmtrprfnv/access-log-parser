@@ -83,6 +83,9 @@ public class Main {
                     System.out.printf("Average number of error requests per hour: %.3f\n", statistics.averageErrorRequestsPerHour());
                     System.out.printf("Average number of visits per user: %.3f\n", statistics.averageVisitsPerUser());
 
+                    System.out.println("Peak traffic: " + statistics.getPeakTraffic());
+                    System.out.println("Peak visits: " + statistics.getPeakVisits());
+
                 } catch (GetFileStatisticsExeption e) {
                     e.printStackTrace();
                 } catch (FileNotFoundException e) {
