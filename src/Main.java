@@ -73,6 +73,12 @@ public class Main {
                     Map<String, Double> osShares = statistics.getOsShares();
                     System.out.println("Shares of operating systems: " + osShares);
 
+                    Map<String, Integer> browserStats = statistics.getBrowserStatistics();
+                    System.out.println("Browser statistics: " + browserStats);
+
+                    Map<String, Double> browserShares = statistics.getBrowserShares();
+                    System.out.println("Shares of browsers: " + browserShares);
+
                 } catch (GetFileStatisticsExeption e) {
                     e.printStackTrace();
                 } catch (FileNotFoundException e) {
