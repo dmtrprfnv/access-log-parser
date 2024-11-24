@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,6 +67,12 @@ public class Main {
                             + "Request rate with GoogleBot: " + googleBotCount + "/" + totalRows);
                     System.out.printf("Statistics: %.3f Mb/hour\n", statistics.getTrafficRate() / 8388608);
 
+                    Map<String, Integer> osStats = statistics.getOsStatistics();
+                    System.out.println("Operating system statistics: " + osStats);
+
+                    Map<String, Double> osShares = statistics.getOsShares();
+                    System.out.println("Shares of operating systems: " + osShares);
+
                 } catch (GetFileStatisticsExeption e) {
                     e.printStackTrace();
                 } catch (FileNotFoundException e) {
@@ -74,7 +81,7 @@ public class Main {
                     throw new RuntimeException(e);
                 }
             }
-            else System.out.println("Неверный путь к файлу! Попробуйте снова...");
+            else System.out.println("Incorrect file path! Try again...");
         }
     }
 }
